@@ -1,0 +1,11 @@
+{
+  "name": "the-best-project",
+  "version": "1.0.0",
+  "description": "This is a full stack project which contain a lot of complexity",
+  "main": "server.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
