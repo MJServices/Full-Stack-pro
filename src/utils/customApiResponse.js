@@ -8,6 +8,7 @@ class ApiResponse {
         this.status = status? status>400 : 200
         this.data = data
         this.success  = success
+        this.message = message
     }
 }
 
