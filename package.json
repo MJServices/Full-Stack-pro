@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "npx nodemon --env-file .env src/app.js"
+    "dev": "npx nodemon --env-file .env src/index.js"
   },
   "author": "",
   "license": "ISC",
