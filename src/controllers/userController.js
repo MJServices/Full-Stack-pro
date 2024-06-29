@@ -6,12 +6,13 @@ import bcrypt from "bcrypt";
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
-  const { username, fullName, email, password, avatar } = await req.body;
+  const { username, fullName, email, password, confirmPassword, avatar } = await req.body;
   let user = {
     username,
     fullName,
     email,
     password,
+    confirmPassword,
     avatar
   };
   var validatedUser = signUpSchema.parse(user);
@@ -19,7 +20,10 @@ export const registerUser = asyncHandler(async (req, res) => {
    throw new ApiError(400, error.errors[0].message, error);
   }
   try {
-    const { username, fullName, email, password, avatar } = validatedUser;
+    const { username, fullName, email, password, confirmPassword, avatar } = validatedUser;
+    if (password !== confirmPassword) {
+      throw new ApiError(400, "Passwords do not match");
+    }
     const isUsernameUnique = await userModel.findOne({ username });
     if (isUsernameUnique) {
       return res.status(400).json(ApiError(400, "Username already exists"));
