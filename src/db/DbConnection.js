@@ -4,7 +4,7 @@ import { response} from "express"
 
 export  const DBConnection = async ()=>{
     try {
-        const conection = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
+        const conection = await mongoose.connect(`${process.env.MONGODB_URI}`)
         console.log({status:200,message:"Connected to database"})
     } catch (error) {
         console.log({status:500,message:"Error in connecting to database"})
