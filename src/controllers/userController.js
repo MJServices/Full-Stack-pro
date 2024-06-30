@@ -7,8 +7,9 @@ import {ApiResponse} from "../utils/customApiResponse.js"
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { username, fullName, email, password, confirmPassword } =
-      await req.body;
+    console.log("working 1")
+    const { username, fullName, email, password, confirmPassword } = req.body;
+    console.log(username, fullName, email, password, confirmPassword)
     let user = {
       username,
       fullName,
@@ -17,16 +18,18 @@ export const registerUser = asyncHandler(async (req, res) => {
       confirmPassword
     };
     var validatedUser = await signUpSchema.parse(user);
+    console.log("working 2")
   } catch (error) {
     throw new ApiError(400, error.errors[0].message, error);
   }
   try {
-    const { username, fullName, email, password, confirmPassword } =
+    let { username, fullName, email, password, confirmPassword } =
       validatedUser;
     if (password !== confirmPassword) {
       throw new ApiError(400, "Passwords do not match");
     }
     confirmPassword = null
+    console.log("working 3")
     const isUsernameUnique = await userModel.findOne({ username });
     if (isUsernameUnique) {
       return res.status(400).json(ApiError(400, "Username already exists"));
@@ -35,16 +38,20 @@ export const registerUser = asyncHandler(async (req, res) => {
     if (isEmailUnique) {
       return res.status(400).json(ApiError(400, "Email already exists"));
     }
+    console.log("working 4")
     const avatarLocalPath = req.files?.avatar[0]?.path
     const coverImageLocalPath = req.files?.coverImage[0]?.path
     if (!avatarLocalPath) {
       throw new ApiError(400, "Avatar is required");
     }
+    console.log("working 5")
+    console.log(avatarLocalPath)
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage  = await uploadOnCloudinary(coverImageLocalPath)
     if(!avatar){
       throw new ApiError(400, "Avatar can't be uploaded")
     }
+    console.log("working 6")
     const createdUser = await userModel({
       username,
       fullName,
@@ -54,10 +61,12 @@ export const registerUser = asyncHandler(async (req, res) => {
       coverImage: coverImage?.url || ""
     });
     await createdUser.save();
+    console.log("working 7")
     const confirmUser = await userModel.findOne( createdUser._id ).select("-password -refreshToken");
     if(!confirmUser){
       throw new ApiError(404, "User creation failed")
     }
+    console.log("working 8")
     return res.status(201).json(
       new ApiResponse({
         status: 201,

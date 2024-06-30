@@ -7,7 +7,6 @@ const signUpSchema = z.object({
 
   password: z.string().min(8, {message: "Password must be at 8 characters long"}).min(0, {message: "Username can't be empty"}).max(20, { message: "Password is too long" }).trim(),
   confirmPassword: z.string().min(8, {message: "Password must be at 8 characters long"}).min(0, {message: "Username can't be empty"}).max(20, { message: "Password is too long" }).trim(),
-  avatar: z.string()
 });
 
 export default signUpSchema;

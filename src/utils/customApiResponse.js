@@ -5,7 +5,7 @@ class ApiResponse {
         success = true,
         message,
     ){
-        this.status = status? status>400 : 200
+        this.status = status
         this.data = data
         this.success  = success
         this.message = message
