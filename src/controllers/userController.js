@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/customApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/customApiResponse.js";
+import bcrypt from "bcryptjs";
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
@@ -35,7 +36,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       return res.status(400).json(ApiError(400, "Email already exists"));
     }
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    
+
     let coverImageLocalPath;
     if (
       req.files &&
@@ -78,5 +79,47 @@ export const registerUser = asyncHandler(async (req, res) => {
     );
   } catch (err) {
     throw new ApiError(500, err.message, err);
+  }
+});
+
+export const loginUser = asyncHandler(async (req, res) => {
+  try {
+    // take some fields username or email, password, confirmPassword from req.body
+    // cheack validations
+    // query db for user
+    // give access token and refresh token
+    const { username, email, password, confirmPassword } = req.body;
+    if (!username && !email) {
+      throw new ApiError(400, "Username or email is required");
+    }
+    const user = {
+      username,
+      email,
+      password,
+      confirmPassword
+    };
+    const validatedUser = await signUpSchema.parse(user);
+    try {
+      let { username, email, password, confirmPassword } = validatedUser;
+      if (password !== confirmPassword) {
+        throw new ApiError(400, "Passwords do not match");
+      }
+      confirmPassword = null;
+      let credentials = username || email;
+      const isCredentialsUnique = await userModel.findOne({
+        $or: [{ Credentials: credentials }, { email: credentials }]
+      });
+      if (!isCredentialsUnique) {
+        throw new ApiError(400, "Credentials already exists");
+      }
+      const comparedPassword = await bcrypt.compare(password, isCredentialsUnique.password);
+      if (!comparedPassword) {
+        throw new ApiError(400, "Password is incorrect");
+      }
+    } catch (err) {
+      throw new ApiError(err.statusCode, err.message, err);
+    }
+  } catch (err) {
+    throw new ApiError(err.statusCode, err.message, err);
   }
 });
