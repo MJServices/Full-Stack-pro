@@ -5,6 +5,7 @@ import { ApiError } from "../utils/customApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/customApiResponse.js";
 import bcrypt from "bcryptjs";
+import {LoginSchema} from "../Schemas/LoginSchema.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
@@ -84,42 +85,44 @@ export const registerUser = asyncHandler(async (req, res) => {
 
 export const loginUser = asyncHandler(async (req, res) => {
   try {
-    // take some fields username or email, password, confirmPassword from req.body
-    // cheack validations
-    // query db for user
-    // give access token and refresh token
-    const { username, email, password, confirmPassword } = req.body;
-    if (!username && !email) {
-      throw new ApiError(400, "Username or email is required");
-    }
+    const { username, password, confirmPassword } = req.body;
     const user = {
       username,
-      email,
       password,
       confirmPassword
     };
-    const validatedUser = await signUpSchema.parse(user);
+    const validatedUser = await LoginSchema.parse(user);
     try {
-      let { username, email, password, confirmPassword } = validatedUser;
+      let { username, password, confirmPassword } = validatedUser;
       if (password !== confirmPassword) {
         throw new ApiError(400, "Passwords do not match");
       }
       confirmPassword = null;
-      let credentials = username || email;
-      const isCredentialsUnique = await userModel.findOne({
-        $or: [{ Credentials: credentials }, { email: credentials }]
-      });
-      if (!isCredentialsUnique) {
-        throw new ApiError(400, "Credentials already exists");
+      const checkUsernameUnique = await userModel.findOne({ username });
+      if (!checkUsernameUnique) {
+        throw new ApiError(404, "Credentials not exists");
       }
-      const comparedPassword = await bcrypt.compare(password, isCredentialsUnique.password);
+      const comparedPassword = await bcrypt.compare(
+        password,
+        checkUsernameUnique.password
+      );
       if (!comparedPassword) {
         throw new ApiError(400, "Password is incorrect");
       }
+      res.status(200).json(
+        new ApiResponse({
+          status: 200,
+          data: {
+            user: checkUsernameUnique
+          },
+          success: true,
+          message: "Login successful"
+        })
+      );
     } catch (err) {
       throw new ApiError(err.statusCode, err.message, err);
     }
   } catch (err) {
-    throw new ApiError(err.statusCode, err.message, err);
+    throw new ApiError(err.statusCode, err.errors[0].message, err);
   }
 });
