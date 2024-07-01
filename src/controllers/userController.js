@@ -90,6 +90,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 export const loginUser = asyncHandler(async (req, res) => {
+  let validatedUser;
   try {
     const { username, password, confirmPassword } = req.body;
     const user = {
@@ -97,38 +98,37 @@ export const loginUser = asyncHandler(async (req, res) => {
       password,
       confirmPassword
     };
-    const validatedUser = await LoginSchema.parse(user);
-    try {
-      let { username, password, confirmPassword } = validatedUser;
-      if (password !== confirmPassword) {
-        throw new ApiError(400, "Passwords do not match");
-      }
-      confirmPassword = null;
-      const checkUsernameUnique = await userModel.findOne({ username });
-      if (!checkUsernameUnique) {
-        throw new ApiError(404, "Credentials not exists");
-      }
-      const comparedPassword = await bcrypt.compare(
-        password,
-        checkUsernameUnique.password
-      );
-      if (!comparedPassword) {
-        throw new ApiError(400, "Password is incorrect");
-      }
-      res.status(200).json(
-        new ApiResponse({
-          status: 200,
-          data: {
-            user: checkUsernameUnique
-          },
-          success: true,
-          message: "Login successful"
-        })
-      );
-    } catch (err) {
-      throw new ApiError(err.statusCode, err.message, err);
-    }
+    validatedUser = await LoginSchema.parse(user);
   } catch (err) {
     throw new ApiError(err.statusCode, err.errors[0].message, err);
+  }  try {
+    let { username, password, confirmPassword } = validatedUser;
+    if (password !== confirmPassword) {
+      throw new ApiError(400, "Passwords do not match");
+    }
+    confirmPassword = null;
+    const checkUsernameUnique = await userModel.findOne({ username });
+    if (!checkUsernameUnique) {
+      throw new ApiError(404, "Username not exists");
+    }
+    const comparedPassword = await bcrypt.compare(
+      password,
+      checkUsernameUnique.password
+    );
+    if (!comparedPassword) {
+     throw new ApiError(400, "Password is incorrect");
+    }
+    res.status(200).json(
+      new ApiResponse({
+        status: 200,
+        data: {
+          user: checkUsernameUnique
+        },
+        success: true,
+        message: "Login successful"
+      })
+    );
+  } catch (err) {
+    throw new ApiError(err.statusCode, err.message, err);
   }
 });
