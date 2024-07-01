@@ -30,14 +30,20 @@ export const registerUser = asyncHandler(async (req, res) => {
     confirmPassword = null;
     const isUsernameUnique = await userModel.findOne({ username });
     if (isUsernameUnique) {
-      return res.status(400).json(ApiError(400, "Username already exists"));
+      throw new ApiError(400, "Username already exists");
     }
     const isEmailUnique = await userModel.findOne({ email });
     if (isEmailUnique) {
-      return res.status(400).json(ApiError(400, "Email already exists"));
+      throw new ApiError(400, "Email already exists");
     }
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-
+    let avatarLocalPath; 
+    if (
+      req.files &&
+      Array.isArray(req.files.avatar) &&
+      req.files.avatar.length > 0
+    ) {
+      avatarLocalPath = req.files.avatar[0].path;
+    }
     let coverImageLocalPath;
     if (
       req.files &&
