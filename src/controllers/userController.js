@@ -253,7 +253,23 @@ export const updateCurrentPassword = asyncHandler(async (req, res) => {
     }
     user.password = cheackedPass;
     user.save({ validateBeforeSave: false });
+    return res.status(200).json(new ApiResponse({
+      status: 200,
+      data: user.password,
+      success: true,
+      message: "Password changed successfully"
+    }))
   } catch (err) {
     throw new ApiError(err.status, err.message);
   }
 });
+
+export const getUser = asyncHandler((req, res)=>{
+  res.status(200).json(new ApiResponse({
+    status: 200,
+    data: req.user,
+    success: true,
+    message: "User fetched successfully"
+  }))
+})
+
