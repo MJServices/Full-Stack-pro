@@ -294,8 +294,35 @@ export const updateUserDetails = asyncHandler(async (req, res) => {
         }
       )
       .select("-password -refreshToken");
-      res.status(200).json(new ApiResponse(200, user, true, "User updated successfully"))
+    res
+      .status(200)
+      .json(new ApiResponse(200, user, true, "User updated successfully"));
   } catch (error) {
     throw new ApiError(err.status, err.message);
+  }
+});
+
+export const updateUserAvatar = asyncHandler(async (req, res) => {
+  try {
+    const avatarLocalPath = req.file?.path;
+    if (!avatarLocalPath) {
+      throw new ApiError(404, "Can't found avatar path");
+    }
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    if (!avatar.url) {
+      throw new ApiError(500, "Some issue while uploading on cloudinary");
+    }
+    const user = userModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set:{
+          avatar: avatar.url
+        }
+      },
+      { new: true }
+    ).select("-password -refreshToken")
+    res.status(200).json(new ApiResponse(200, user, true, "Avatar changed successfully"))
+  } catch (error) {
+    throw new ApiError(err.status, err.message, error)
   }
 });
