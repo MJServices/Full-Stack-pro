@@ -71,9 +71,9 @@ userSchema.methods.checkPassword = async function (pass) {
       success: true,
       message: "Password is valid",
       data: checkedPass
-    }
+    };
   } else {
-    throw new ApiError(401,"Password is invalid");
+    throw new ApiError(401, "Password is invalid");
   }
 };
 userSchema.methods.generateAccessToken = function () {
