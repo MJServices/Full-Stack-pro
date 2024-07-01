@@ -5,7 +5,7 @@ import { ApiError } from "../utils/customApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/customApiResponse.js";
 import bcrypt from "bcryptjs";
-import {LoginSchema} from "../Schemas/LoginSchema.js";
+import { LoginSchema } from "../Schemas/LoginSchema.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
@@ -36,7 +36,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     if (isEmailUnique) {
       throw new ApiError(400, "Email already exists");
     }
-    let avatarLocalPath; 
+    let avatarLocalPath;
     if (
       req.files &&
       Array.isArray(req.files.avatar) &&
@@ -101,7 +101,8 @@ export const loginUser = asyncHandler(async (req, res) => {
     validatedUser = await LoginSchema.parse(user);
   } catch (err) {
     throw new ApiError(err.statusCode, err.errors[0].message, err);
-  }  try {
+  }
+  try {
     let { username, password, confirmPassword } = validatedUser;
     if (password !== confirmPassword) {
       throw new ApiError(400, "Passwords do not match");
@@ -116,7 +117,7 @@ export const loginUser = asyncHandler(async (req, res) => {
       checkUsernameUnique.password
     );
     if (!comparedPassword) {
-     throw new ApiError(400, "Password is incorrect");
+      throw new ApiError(400, "Password is incorrect");
     }
     res.status(200).json(
       new ApiResponse({
