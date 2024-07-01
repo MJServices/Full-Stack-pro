@@ -236,6 +236,24 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
         })
       );
   } catch (error) {
-    throw new ApiError(400, error.message, error)
+    throw new ApiError(400, error.message, error);
+  }
+});
+
+export const updateCurrentPassword = asyncHandler(async (req, res) => {
+  try {
+    const { password, newPassword, confirmNewPassword } = req.body;
+    if (newPassword !== confirmNewPassword) {
+      throw new ApiError(401, "New password doesn't match");
+    }
+    const user = req.user;
+    const cheackedPass = await user.checkPassword(password);
+    if (!cheackedPass) {
+      throw new ApiError(401, "Invalid Password");
+    }
+    user.password = cheackedPass;
+    user.save({ validateBeforeSave: false });
+  } catch (err) {
+    throw new ApiError(err.status, err.message);
   }
 });
