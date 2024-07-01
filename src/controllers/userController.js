@@ -137,26 +137,65 @@ export const loginUser = asyncHandler(async (req, res) => {
     }
     const tokens = await generateRefreshAndAccessToken(user._id);
     const { accessToken, refreshToken } = tokens;
-    res.status(200)
-    .cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true,
-    })
-    .cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-    })
-    .json(
-      new ApiResponse({
-        status: 200,
-        data: {
-          user: checkUsernameUnique
-        },
-        success: true,
-        message: "Login successful"
+    res
+      .status(200)
+      .cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: true
       })
-    );
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true
+      })
+      .json(
+        new ApiResponse({
+          status: 200,
+          data: {
+            user: checkUsernameUnique
+          },
+          success: true,
+          message: "Login successful"
+        })
+      );
   } catch (err) {
     throw new ApiError(err.statusCode, err.message, err);
   }
+});
+
+export const logoutUser = asyncHandler(async (req, res) => {
+  try {
+    const data = req.user;
+    if (!data) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+    const user = await userModel.findByIdAndUpdate(
+      data._id,
+      {
+        $set: {
+          refreshToken: undefined
+        }
+      },
+      {
+        new: true
+      }
+    );
+    const options = {
+      httpOnly: true,
+      secure: true
+    };
+    res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json(
+        new ApiResponse({
+          status: 200,
+          data: {
+            user
+          },
+          success: true,
+          message: "Logout successful"
+        })
+      );
+  } catch (error) {}
 });
