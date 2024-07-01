@@ -6,6 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/customApiResponse.js";
 import bcrypt from "bcryptjs";
 import { LoginSchema } from "../Schemas/LoginSchema.js";
+import jwt from "jsonwebtoken";
 
 export const generateRefreshAndAccessToken = async (userId) => {
   const user = await userModel.findById(userId);
@@ -198,4 +199,43 @@ export const logoutUser = asyncHandler(async (req, res) => {
         })
       );
   } catch (error) {}
+});
+
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  try {
+    const webrefreshToken = req.cookies.refreshToken;
+    const token = jwt.verify(
+      "refreshToken",
+      webrefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    const user = await userModel.findOne({ _id: token._id });
+    if (!user) {
+      throw new ApiError(401, "Invalid Refresh token");
+    }
+    if (webrefreshToken !== user.refreshToken) {
+      throw new ApiError(401, "Refresh token is expiered either used");
+    }
+    const { accessToken, refreshToken } = await generateRefreshAndAccessToken(
+      user._id
+    );
+    const options = {
+      httpOnly: true,
+      secure: true
+    };
+    res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+        new ApiResponse({
+          status: 200,
+          data: null,
+          success: true,
+          message: "Successfully new token created"
+        })
+      );
+  } catch (error) {
+    throw new ApiError(400, error.message, error)
+  }
 });
