@@ -20,7 +20,7 @@ export const generateRefreshAndAccessToken = async (userId) => {
     accessToken,
     refreshToken
   };
-}
+};
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
@@ -123,19 +123,30 @@ export const loginUser = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Passwords do not match");
     }
     confirmPassword = null;
-    const checkUsernameUnique = await userModel.findOne({ username }).select("-password -refreshToken");
+    const checkUsernameUnique = await userModel
+      .findOne({ username })
+      .select("-password -refreshToken");
     if (!checkUsernameUnique) {
       throw new ApiError(404, "Username not exists");
     }
-    const user = await userModel.findOne({ username })
+    const user = await userModel.findOne({ username });
     const comparedPassword = await user.checkPassword(password);
-    console.log(comparedPassword)
+    console.log(comparedPassword);
     if (!comparedPassword) {
       throw new ApiError(401, "Password is incorrect");
     }
     const tokens = await generateRefreshAndAccessToken(user._id);
     const { accessToken, refreshToken } = tokens;
-    res.status(200).json(
+    res.status(200)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+    })
+    .json(
       new ApiResponse({
         status: 200,
         data: {

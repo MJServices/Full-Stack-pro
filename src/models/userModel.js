@@ -65,7 +65,6 @@ userSchema.methods.checkPassword = async function (pass) {
   // If this not worked resiprocle password
   const checkedPass = await bcrypt.compare(pass, this.password);
   if (checkedPass) {
-    console.log({ status: 200, success: true, message: "Password is valid" });
     return {
       status: 200,
       success: true,
