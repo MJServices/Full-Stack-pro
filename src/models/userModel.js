@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { ApiError } from "../utils/customApiError.js";
 
 const userSchema = new Schema(
   {
@@ -60,17 +61,19 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-userSchema.methods.checkPassword = async (password) => {
+userSchema.methods.checkPassword = async function (pass) {
   // If this not worked resiprocle password
-  const checkedPass = await bcrypt.compare(this.password, password);
-  if (checkPassword) {
-    console.log({ status: 200, success: true, message: "Password is correct" });
+  const checkedPass = await bcrypt.compare(pass, this.password);
+  if (checkedPass) {
+    console.log({ status: 200, success: true, message: "Password is valid" });
+    return {
+      status: 200,
+      success: true,
+      message: "Password is valid",
+      data: checkedPass
+    }
   } else {
-    console.log({
-      status: 400,
-      success: false,
-      message: "Password is not correct"
-    });
+    throw new ApiError(401,"Password is invalid");
   }
 };
 userSchema.methods.generateAccessToken = function () {

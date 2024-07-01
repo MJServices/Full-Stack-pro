@@ -7,6 +7,21 @@ import { ApiResponse } from "../utils/customApiResponse.js";
 import bcrypt from "bcryptjs";
 import { LoginSchema } from "../Schemas/LoginSchema.js";
 
+export const generateRefreshAndAccessToken = async (userId) => {
+  const user = await userModel.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
+  return {
+    accessToken,
+    refreshToken
+  };
+}
+
 export const registerUser = asyncHandler(async (req, res) => {
   try {
     const { username, fullName, email, password, confirmPassword } = req.body;
@@ -108,17 +123,17 @@ export const loginUser = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Passwords do not match");
     }
     confirmPassword = null;
-    const checkUsernameUnique = await userModel.findOne({ username });
+    const checkUsernameUnique = await userModel.findOne({ username }).select("-password -refreshToken");
     if (!checkUsernameUnique) {
       throw new ApiError(404, "Username not exists");
     }
-    const comparedPassword = await bcrypt.compare(
-      password,
-      checkUsernameUnique.password
-    );
+    const user = await userModel.findOne({ username })
+    const comparedPassword = await user.checkPassword(password);
+    console.log(comparedPassword)
     if (!comparedPassword) {
-      throw new ApiError(400, "Password is incorrect");
+      throw new ApiError(401, "Password is incorrect");
     }
+    console.log("working 3")
     res.status(200).json(
       new ApiResponse({
         status: 200,
