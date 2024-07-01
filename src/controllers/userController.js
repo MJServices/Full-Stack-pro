@@ -253,23 +253,49 @@ export const updateCurrentPassword = asyncHandler(async (req, res) => {
     }
     user.password = cheackedPass;
     user.save({ validateBeforeSave: false });
-    return res.status(200).json(new ApiResponse({
-      status: 200,
-      data: user.password,
-      success: true,
-      message: "Password changed successfully"
-    }))
+    return res.status(200).json(
+      new ApiResponse({
+        status: 200,
+        data: user.password,
+        success: true,
+        message: "Password changed successfully"
+      })
+    );
   } catch (err) {
     throw new ApiError(err.status, err.message);
   }
 });
 
-export const getUser = asyncHandler((req, res)=>{
-  res.status(200).json(new ApiResponse({
-    status: 200,
-    data: req.user,
-    success: true,
-    message: "User fetched successfully"
-  }))
-})
+export const getUser = asyncHandler((req, res) => {
+  res.status(200).json(
+    new ApiResponse({
+      status: 200,
+      data: req.user,
+      success: true,
+      message: "User fetched successfully"
+    })
+  );
+});
 
+export const updateUserDetails = asyncHandler(async (req, res) => {
+  try {
+    const { fullName, email } = req.body;
+    const user = await userModel
+      .findOneAndUpdate(
+        req.user._id,
+        {
+          $set: {
+            fullName,
+            email
+          }
+        },
+        {
+          new: true
+        }
+      )
+      .select("-password -refreshToken");
+      res.status(200).json(new ApiResponse(200, user, true, "User updated successfully"))
+  } catch (error) {
+    throw new ApiError(err.status, err.message);
+  }
+});
