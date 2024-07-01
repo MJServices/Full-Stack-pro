@@ -69,7 +69,7 @@ userSchema.methods.checkPassword = async function (pass) {
       status: 200,
       success: true,
       message: "Password is valid",
-      data: checkedPass
+      data: null
     };
   } else {
     throw new ApiError(401, "Password is invalid");
