@@ -133,7 +133,8 @@ export const loginUser = asyncHandler(async (req, res) => {
     if (!comparedPassword) {
       throw new ApiError(401, "Password is incorrect");
     }
-    await generateRefreshAndAccessToken(user._id);
+    const tokens = await generateRefreshAndAccessToken(user._id);
+    const { accessToken, refreshToken } = tokens;
     res.status(200).json(
       new ApiResponse({
         status: 200,
