@@ -372,24 +372,34 @@ export const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 export const getChannelProfileDetails = asyncHandler(async (req, res) => {
-  const { username } = req.params();
-  const user = userModel.aggregate([
+  const { username } = req.body;
+  console.log(username);
+  if (!username?.trim()) {
+    throw new ApiError(400, "username is missing");
+  }
+  const channel = userModel.aggregate([
     {
       $match: {
-        username
-      },
+        username: username?.toLowerCase()
+      }
+    },
+    {
       $lookup: {
         from: "subscriptions",
         as: "subscriber",
         localField: "_id",
         foreignField: "channel"
-      },
+      }
+    },
+    {
       $lookup: {
         from: "subscriptions",
         as: "subscribedChannels",
         localField: "_id",
         foreignField: "subscriber"
-      },
+      }
+    },
+    {
       $addFields: {
         subscriberCount: {
           $size: "$subscribers"
@@ -404,7 +414,9 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
             else: false
           }
         }
-      },
+      }
+    },
+    {
       $project: {
         fullName: 1,
         username: 1,
@@ -418,4 +430,9 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
       }
     }
   ]);
+  if(!channel?.length){
+    throw new ApiError(400, "Channel doesn't exist")
+  }
+  res.status(200)
+  .json(new ApiResponse(200, channel, true ,"successfully fetched data"))
 });
