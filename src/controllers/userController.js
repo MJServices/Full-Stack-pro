@@ -332,7 +332,6 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const updateUserCoverImage = asyncHandler(async (req, res) => {
   try {
     const coverImageLocalPath = req.file?.path;
@@ -361,3 +360,34 @@ export const updateUserCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(err.status, err.message, error)
   }
 });
+
+export const getChannelProfileDetails = asyncHandler(async (req, res)=>{
+  const {username} = req.params()
+  const user = userModel.aggregate([
+    {
+      $match: {
+        username
+      },
+      $lookup: {
+        from: "subscriptions",
+        as: "subscriber",
+        localField: "_id",
+        foreignField: "channel"
+      },
+      $lookup: {
+        from: "subscriptions",
+        as: "subscribedChannels",
+        localField: "_id",
+        foreignField: "subscriber"
+      },
+      $addFields: {
+        subscriberCount: {
+          $size: "$subscriber"
+        },
+        subscriberCount: {
+          $size: "$subscribedChannels"
+        },
+      }
+    }
+  ])
+})
