@@ -394,7 +394,7 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
         subscriberCount: {
           $size: "$subscribers"
         },
-        subscriberCount: {
+        subscribedChannelsCount: {
           $size: "$subscribedChannels"
         },
         isSubscribed: {
@@ -404,6 +404,17 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
             else: false
           }
         }
+      },
+      $project: {
+        fullName: 1,
+        username: 1,
+        email: 1,
+        subscriberCount: 1,
+        subscribedChannelsCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+        createdAt: 1
       }
     }
   ]);
