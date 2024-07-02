@@ -7,6 +7,7 @@ import { ApiResponse } from "../utils/customApiResponse.js";
 import bcrypt from "bcryptjs";
 import { LoginSchema } from "../Schemas/LoginSchema.js";
 import jwt from "jsonwebtoken";
+import fs from "fs"
 
 export const generateRefreshAndAccessToken = async (userId) => {
   const user = await userModel.findById(userId);
@@ -309,6 +310,10 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Can't found avatar path");
     }
     const avatar = await uploadOnCloudinary(avatarLocalPath);
+    if(avatar){
+      fs.unlinkSync(avatarLocalPath)
+      return null;
+    }
     if (!avatar.url) {
       throw new ApiError(500, "Some issue while uploading on cloudinary");
     }
@@ -335,6 +340,10 @@ export const updateUserCoverImage = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Can't found avatar path");
     }
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    if(coverImage){
+      fs.unlinkSync(coverImageLocalPath)
+      return null;
+    }
     if (!coverImage.url) {
       throw new ApiError(500, "Some issue while uploading on cloudinary");
     }
