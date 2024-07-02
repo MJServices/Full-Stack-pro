@@ -7,7 +7,7 @@ import { ApiResponse } from "../utils/customApiResponse.js";
 import bcrypt from "bcryptjs";
 import { LoginSchema } from "../Schemas/LoginSchema.js";
 import jwt from "jsonwebtoken";
-import fs from "fs"
+import fs from "fs";
 
 export const generateRefreshAndAccessToken = async (userId) => {
   const user = await userModel.findById(userId);
@@ -310,25 +310,29 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Can't found avatar path");
     }
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    if(avatar){
-      fs.unlinkSync(avatarLocalPath)
+    if (avatar) {
+      fs.unlinkSync(avatarLocalPath);
       return null;
     }
     if (!avatar.url) {
       throw new ApiError(500, "Some issue while uploading on cloudinary");
     }
-    const user = userModel.findByIdAndUpdate(
-      req.user._id,
-      {
-        $set:{
-          avatar: avatar.url
-        }
-      },
-      { new: true }
-    ).select("-password -refreshToken")
-    res.status(200).json(new ApiResponse(200, user, true, "Avatar changed successfully"))
+    const user = userModel
+      .findByIdAndUpdate(
+        req.user._id,
+        {
+          $set: {
+            avatar: avatar.url
+          }
+        },
+        { new: true }
+      )
+      .select("-password -refreshToken");
+    res
+      .status(200)
+      .json(new ApiResponse(200, user, true, "Avatar changed successfully"));
   } catch (error) {
-    throw new ApiError(err.status, err.message, error)
+    throw new ApiError(err.status, err.message, error);
   }
 });
 
@@ -339,30 +343,36 @@ export const updateUserCoverImage = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Can't found avatar path");
     }
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-    if(coverImage){
-      fs.unlinkSync(coverImageLocalPath)
+    if (coverImage) {
+      fs.unlinkSync(coverImageLocalPath);
       return null;
     }
     if (!coverImage.url) {
       throw new ApiError(500, "Some issue while uploading on cloudinary");
     }
-    const user = userModel.findByIdAndUpdate(
-      req.user._id,
-      {
-        $set:{
-          coverImage: coverImage.url
-        }
-      },
-      { new: true }
-    ).select("-password -refreshToken")
-    res.status(200).json(new ApiResponse(200, user, true, "Cover image changed successfully"))
+    const user = userModel
+      .findByIdAndUpdate(
+        req.user._id,
+        {
+          $set: {
+            coverImage: coverImage.url
+          }
+        },
+        { new: true }
+      )
+      .select("-password -refreshToken");
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, user, true, "Cover image changed successfully")
+      );
   } catch (error) {
-    throw new ApiError(err.status, err.message, error)
+    throw new ApiError(err.status, err.message, error);
   }
 });
 
-export const getChannelProfileDetails = asyncHandler(async (req, res)=>{
-  const {username} = req.params()
+export const getChannelProfileDetails = asyncHandler(async (req, res) => {
+  const { username } = req.params();
   const user = userModel.aggregate([
     {
       $match: {
@@ -382,12 +392,19 @@ export const getChannelProfileDetails = asyncHandler(async (req, res)=>{
       },
       $addFields: {
         subscriberCount: {
-          $size: "$subscriber"
+          $size: "$subscribers"
         },
         subscriberCount: {
           $size: "$subscribedChannels"
         },
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false
+          }
+        }
       }
     }
-  ])
-})
+  ]);
+});
