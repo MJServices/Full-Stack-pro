@@ -373,8 +373,7 @@ export const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 export const getChannelProfileDetails = asyncHandler(async (req, res) => {
-  const { username } = req.body;
-  console.log(username);
+  const username = req.query.username;
   if (!username?.trim()) {
     throw new ApiError(400, "username is missing");
   }
@@ -437,3 +436,5 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
   res.status(200)
   .json(new ApiResponse(200, channel, true ,"successfully fetched data"))
 });
+
+export const getWatchHistory = asyncHandler(async (req, res) => {});
