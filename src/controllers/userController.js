@@ -388,7 +388,7 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
         from: "subscriptions",
         localField: "_id",
         foreignField: "channel",
-        as: "subscribers",
+        as: "subscribers"
       }
     },
     {
@@ -430,11 +430,54 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
       }
     }
   ]);
-  if(!channel?.length){
-    throw new ApiError(400, "Channel doesn't exist")
+  if (!channel?.length) {
+    throw new ApiError(400, "Channel doesn't exist");
   }
-  res.status(200)
-  .json(new ApiResponse(200, channel, true ,"successfully fetched data"))
+  res
+    .status(200)
+    .json(new ApiResponse(200, channel, true, "successfully fetched data"));
 });
 
-export const getWatchHistory = asyncHandler(async (req, res) => {});
+export const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await userModel.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id)
+      }
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [
+          {
+            $lookup: {
+              from: "user",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields: {
+              $arrayElemAt: ["$owner", 0]
+            }
+          }
+        ]
+      }
+    }
+  ]);
+  console.log(user);
+  res.status(200).json(new ApiResponse(200, user.watchHistory, true, "Successfully fetched watch history"));
+});
