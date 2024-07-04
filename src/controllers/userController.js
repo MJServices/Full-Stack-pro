@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import { LoginSchema } from "../Schemas/LoginSchema.js";
 import jwt from "jsonwebtoken";
 import fs from "fs";
+import { Subscription } from "../models/subscription.js";
 
 export const generateRefreshAndAccessToken = async (userId) => {
   const user = await userModel.findById(userId);
@@ -377,7 +378,7 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
   if (!username?.trim()) {
     throw new ApiError(400, "username is missing");
   }
-  const channel = userModel.aggregate([
+  const channel = await userModel.aggregate([
     {
       $match: {
         username: username?.toLowerCase()
@@ -386,17 +387,17 @@ export const getChannelProfileDetails = asyncHandler(async (req, res) => {
     {
       $lookup: {
         from: "subscriptions",
-        as: "subscriber",
         localField: "_id",
-        foreignField: "channel"
+        foreignField: "channel",
+        as: "subscribers",
       }
     },
     {
       $lookup: {
         from: "subscriptions",
-        as: "subscribedChannels",
         localField: "_id",
-        foreignField: "subscriber"
+        foreignField: "subscriber",
+        as: "subscribedChannels"
       }
     },
     {
