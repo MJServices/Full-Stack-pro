@@ -22,5 +22,6 @@ userRouter.route("/login").post(loginUser)
 userRouter.route("/logout").post(authMiddleware, logoutUser)
 userRouter.route("/refreshAccessToken").post(refreshAccessToken)
 userRouter.route("/getChannelProfileDetails").post(authMiddleware, getChannelProfileDetails)
+userRouter.route("/refreshAccessToken").post(authMiddleware, refreshAccessToken)
 
 export default userRouter
