@@ -2,9 +2,9 @@ import {Router} from "express"
 import { getChannelProfileDetails, getUser, getWatchHistory, loginUser, logoutUser, refreshAccessToken, registerUser, updateCurrentPassword, updateUserAvatar, updateUserCoverImage, updateUserDetails } from "../controllers/userController.js"
 import { upload } from "../middlewares/multerMiddleware.js"
 import { authMiddleware } from "../middlewares/authMiddleware.js"
-const userRouter = Router()
+const router = Router()
 
-userRouter.route("/signup").post( 
+router.route("/signup").post( 
     upload.fields([
         {
             name: "avatar",
@@ -18,7 +18,7 @@ userRouter.route("/signup").post(
     registerUser
 )
 
-userRouter.route("/login").post(loginUser)
+router.route("/login").post(loginUser)
 
 router.route("/logout").post(authMiddleware,  logoutUser)
 router.route("/refresh-token").post(refreshAccessToken)
@@ -31,4 +31,4 @@ router.route("/cover-image").patch(authMiddleware, upload.single("coverImage"), 
 
 router.route("/channel").get(authMiddleware, getChannelProfileDetails)
 router.route("/history").get(authMiddleware, getWatchHistory)
-export default userRouter
+export default router
