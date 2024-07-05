@@ -6,10 +6,9 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
-} from "../controllers/video.controller.js"
+} from "../controllers/videoController.js"
 import {authMiddleware} from "../middlewares/authMiddleware.js"
-import {upload} from "../middlewares/multer.middleware.js"
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import {upload} from "../middlewares/multerMiddleware.js"
 
 const router = Router();
 router.use(authMiddleware); // Apply authMiddleware middleware to all routes in this file

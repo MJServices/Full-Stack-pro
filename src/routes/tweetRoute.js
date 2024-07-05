@@ -4,7 +4,7 @@ import {
     deleteTweet,
     getUserTweets,
     updateTweet,
-} from "../controllers/tweet.controller.js"
+} from "../controllers/tweetController.js"
 import {authMiddleware} from "../middlewares/authMiddleware.js"
 
 const router = Router();

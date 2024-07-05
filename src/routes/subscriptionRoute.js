@@ -3,7 +3,7 @@ import {
     getSubscribedChannels,
     getUserChannelSubscribers,
     toggleSubscription,
-} from "../controllers/subscription.controller.js"
+} from "../controllers/subscriptionController.js"
 import {authMiddleware} from "../middlewares/authMiddleware.js"
 
 const router = Router();

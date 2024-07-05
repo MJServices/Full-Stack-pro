@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
     getChannelStats,
     getChannelVideos,
-} from "../controllers/dashboard.controller.js"
+} from "../controllers/dashboardController.js"
 import {authMiddleware} from "../middlewares/authMiddleware.js"
 
 const router = Router();

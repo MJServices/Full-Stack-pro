@@ -4,7 +4,7 @@ import {
     deleteComment,
     getVideoComments,
     updateComment,
-} from "../controllers/comment.controller.js"
+} from "../controllers/commentController.js"
 import {authMiddleware} from "../middlewares/authMiddleware.js"
 
 const router = Router();
