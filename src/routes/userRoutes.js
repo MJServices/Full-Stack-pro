@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { getChannelProfileDetails, loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/userController.js"
+import { getChannelProfileDetails, getUser, getWatchHistory, loginUser, logoutUser, refreshAccessToken, registerUser, updateCurrentPassword, updateUserAvatar, updateUserCoverImage, updateUserDetails } from "../controllers/userController.js"
 import { upload } from "../middlewares/multerMiddleware.js"
 import { authMiddleware } from "../middlewares/authMiddleware.js"
 const userRouter = Router()
@@ -19,9 +19,16 @@ userRouter.route("/signup").post(
 )
 
 userRouter.route("/login").post(loginUser)
-userRouter.route("/logout").post(authMiddleware, logoutUser)
-userRouter.route("/refreshAccessToken").post(refreshAccessToken)
-userRouter.route("/getChannelProfileDetails").post(authMiddleware, getChannelProfileDetails)
-userRouter.route("/refreshAccessToken").post(authMiddleware, refreshAccessToken)
 
+router.route("/logout").post(authMiddleware,  logoutUser)
+router.route("/refresh-token").post(refreshAccessToken)
+router.route("/change-password").post(authMiddleware, updateCurrentPassword)
+router.route("/current-user").get(authMiddleware, getUser)
+router.route("/update-account").patch(authMiddleware, updateUserDetails)
+
+router.route("/avatar").patch(authMiddleware, upload.single("avatar"), updateUserAvatar)
+router.route("/cover-image").patch(authMiddleware, upload.single("coverImage"), updateUserCoverImage)
+
+router.route("/channel").get(authMiddleware, getChannelProfileDetails)
+router.route("/history").get(authMiddleware, getWatchHistory)
 export default userRouter

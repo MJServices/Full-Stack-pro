@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import { LoginSchema } from "../Schemas/LoginSchema.js";
 import jwt from "jsonwebtoken";
 import fs from "fs";
-import { Subscription } from "../models/subscription.js";
+import { Subscription } from "../models/subscriptionModel.js";
 
 export const generateRefreshAndAccessToken = async (userId) => {
   const user = await userModel.findById(userId);
